@@ -1,8 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 
-// gemini-2.5-flash is on Google AI Studio's free tier (no credit card required):
-// 1,500 requests/day, 15 requests/minute — comfortably enough for this app.
-export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+// gemini-3.6-flash is on Google AI Studio's free tier (no credit card required):
+// 1,500 requests/day, 10 requests/minute — comfortably enough for this app.
+// (gemini-2.5-flash, used here previously, is no longer available to new API
+// keys as of Google's own deprecation notice — see GEMINI_MODEL if you need
+// to override this.)
+export const DEFAULT_GEMINI_MODEL = "gemini-3.6-flash";
 
 export interface GeminiMessage {
   role: "user" | "assistant";
