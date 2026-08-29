@@ -4,11 +4,11 @@ import { ASK_MONEYSENSE_SYSTEM_PROMPT } from "@/lib/ai/systemPrompt";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const MODEL = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
 const MAX_MESSAGES = 20;
-const MAX_MESSAGE_LENGTH = 2000;
+const MAX_MESSAGE_LENGTH = 6000;
 
 interface ChatMessage {
   role: "user" | "assistant";

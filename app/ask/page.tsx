@@ -171,7 +171,7 @@ export default function AskPage() {
               animate={{ opacity: 1 }}
             >
               <Loader2 size={16} className="animate-spin text-forest-500" />
-              MoneySense is thinking...
+              MoneySense is thinking through a full answer — can take up to a minute...
             </motion.div>
           )}
 
@@ -206,10 +206,10 @@ export default function AskPage() {
                 sendMessage(input);
               }
             }}
-            placeholder="Ask MoneySense anything about financial literacy..."
-            rows={1}
+            placeholder="Ask MoneySense anything about financial literacy — write as much as you need..."
+            rows={2}
             aria-label="Ask MoneySense a question"
-            className="field-input max-h-32 flex-1 resize-none"
+            className="field-input max-h-60 flex-1 resize-y"
           />
           <button
             type="submit"

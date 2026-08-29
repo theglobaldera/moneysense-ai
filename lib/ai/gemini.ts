@@ -12,10 +12,11 @@ export interface GeminiMessage {
   content: string;
 }
 
-// Kept under 10s so this fires before a Vercel Hobby-plan function's own
-// platform timeout would kill the request with a generic 504 page instead
-// of this route's friendly JSON error.
-const DEFAULT_TIMEOUT_MS = 9_000;
+// This project runs on Vercel Fluid Compute (see maxDuration in each route),
+// which allows far longer function execution than the classic 10s Hobby
+// limit — so this can be generous enough for a genuinely long, in-depth
+// response without the platform killing the request first.
+const DEFAULT_TIMEOUT_MS = 30_000;
 
 export class GeminiTimeoutError extends Error {
   constructor() {
@@ -45,7 +46,7 @@ export async function callGemini({
   model,
   systemInstruction,
   messages,
-  maxOutputTokens = 700,
+  maxOutputTokens = 2048,
   timeoutMs = DEFAULT_TIMEOUT_MS,
 }: {
   apiKey: string;
