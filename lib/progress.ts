@@ -115,3 +115,30 @@ export function hasAnyProgress(state: ProgressState): boolean {
     state.exploredScenarios.length > 0
   );
 }
+
+/**
+ * Seeds a realistic-looking progress state so the Progress page has
+ * something to show without the user (or a presenter demoing the app)
+ * having to complete several quizzes first. This writes to the same
+ * localStorage key as real progress — it's a genuine preview of the
+ * feature, not a separate mode.
+ */
+export function seedSampleProgress(): ProgressState {
+  const now = Date.now();
+  const daysAgo = (n: number) => new Date(now - n * 86_400_000).toISOString();
+
+  const sample: ProgressState = {
+    completedTopics: ["budgeting", "saving", "interest", "borrowing", "scam-awareness"],
+    quizAttempts: [
+      { topicSlug: "budgeting", score: 3, total: 4, completedAt: daysAgo(6) },
+      { topicSlug: "saving", score: 4, total: 4, completedAt: daysAgo(5) },
+      { topicSlug: "interest", score: 3, total: 4, completedAt: daysAgo(4) },
+      { topicSlug: "borrowing", score: 4, total: 4, completedAt: daysAgo(2) },
+      { topicSlug: "scam-awareness", score: 4, total: 4, completedAt: daysAgo(1) },
+    ],
+    exploredScenarios: ["i-want-to-save", "should-i-take-this-loan", "is-this-offer-safe"],
+  };
+
+  saveProgress(sample);
+  return sample;
+}
