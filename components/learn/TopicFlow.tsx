@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Lightbulb,
   Sparkles,
@@ -58,7 +59,12 @@ export default function TopicFlow({ topic }: { topic: Topic }) {
 
   if (step === "intro") {
     return (
-      <div className="mt-6 space-y-5">
+      <motion.div
+        className="mt-6 space-y-5"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+      >
         <div className="card">
           <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-forest-600">
             <Lightbulb size={14} /> Simple Explanation
@@ -74,7 +80,7 @@ export default function TopicFlow({ topic }: { topic: Topic }) {
         <button onClick={() => setStep("quiz")} className="btn-primary w-full sm:w-auto">
           Start Quick Check <ArrowRight size={16} />
         </button>
-      </div>
+      </motion.div>
     );
   }
 
@@ -85,47 +91,72 @@ export default function TopicFlow({ topic }: { topic: Topic }) {
         <p className="text-sm font-medium text-charcoal-500">
           Question {questionIndex + 1} of {topic.quiz.length}
         </p>
-        <div className="card">
-          <h2 className="text-lg font-semibold">{question.question}</h2>
-          <div className="mt-4 grid gap-2.5">
-            {question.options.map((option) => {
-              const selected = selectedOptionId === option.id;
-              const showCorrect = selectedOptionId && option.id === question.correctOptionId;
-              const showIncorrect = selected && !isCorrect;
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => selectOption(option.id)}
-                  disabled={Boolean(selectedOptionId)}
-                  className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left text-sm font-medium transition ${
-                    showCorrect
-                      ? "border-forest-500 bg-forest-50 text-forest-800"
-                      : showIncorrect
-                      ? "border-red-300 bg-red-50 text-red-800"
-                      : "border-charcoal-300/30 text-charcoal-700 hover:border-forest-300"
-                  } ${selectedOptionId ? "cursor-default" : "cursor-pointer"}`}
-                >
-                  {option.label}
-                  {showCorrect && <CheckCircle2 size={18} className="shrink-0 text-forest-600" />}
-                  {showIncorrect && <XCircle size={18} className="shrink-0 text-red-600" />}
-                </button>
-              );
-            })}
-          </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={questionIndex}
+            initial={{ opacity: 0, x: 16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -16 }}
+            transition={{ duration: 0.25 }}
+          >
+            <div className="card">
+              <h2 className="text-lg font-semibold">{question.question}</h2>
+              <div className="mt-4 grid gap-2.5">
+                {question.options.map((option) => {
+                  const selected = selectedOptionId === option.id;
+                  const showCorrect = selectedOptionId && option.id === question.correctOptionId;
+                  const showIncorrect = selected && !isCorrect;
+                  return (
+                    <motion.button
+                      key={option.id}
+                      onClick={() => selectOption(option.id)}
+                      disabled={Boolean(selectedOptionId)}
+                      whileHover={!selectedOptionId ? { y: -2 } : undefined}
+                      whileTap={!selectedOptionId ? { scale: 0.98 } : undefined}
+                      className={`flex items-center justify-between rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors ${
+                        showCorrect
+                          ? "border-forest-500 bg-forest-50 text-forest-800"
+                          : showIncorrect
+                          ? "border-red-300 bg-red-50 text-red-800"
+                          : "border-charcoal-300/30 text-charcoal-700 hover:border-forest-300"
+                      } ${selectedOptionId ? "cursor-default" : "cursor-pointer"}`}
+                    >
+                      {option.label}
+                      {showCorrect && <CheckCircle2 size={18} className="shrink-0 text-forest-600" />}
+                      {showIncorrect && <XCircle size={18} className="shrink-0 text-red-600" />}
+                    </motion.button>
+                  );
+                })}
+              </div>
 
-          {selectedOptionId && (
-            <div className={`mt-4 rounded-lg p-4 text-sm ${isCorrect ? "bg-forest-50 text-forest-800" : "bg-amber-400/10 text-charcoal-700"}`}>
-              <p className="font-semibold">{isCorrect ? "Correct." : "Not quite."}</p>
-              <p className="mt-1">{question.explanation}</p>
+              <AnimatePresence>
+                {selectedOptionId && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    transition={{ duration: 0.25 }}
+                    className={`mt-4 overflow-hidden rounded-lg p-4 text-sm ${isCorrect ? "bg-forest-50 text-forest-800" : "bg-amber-400/10 text-charcoal-700"}`}
+                  >
+                    <p className="font-semibold">{isCorrect ? "Correct." : "Not quite."}</p>
+                    <p className="mt-1">{question.explanation}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          )}
-        </div>
 
-        {selectedOptionId && (
-          <button onClick={nextQuestion} className="btn-primary">
-            {isLastQuestion ? "See Results" : "Next Question"} <ArrowRight size={16} />
-          </button>
-        )}
+            {selectedOptionId && (
+              <motion.button
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                onClick={nextQuestion}
+                className="btn-primary mt-5"
+              >
+                {isLastQuestion ? "See Results" : "Next Question"} <ArrowRight size={16} />
+              </motion.button>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     );
   }
@@ -135,9 +166,20 @@ export default function TopicFlow({ topic }: { topic: Topic }) {
   const percent = Math.round((score / topic.quiz.length) * 100);
 
   return (
-    <div className="mt-6 space-y-5">
+    <motion.div
+      className="mt-6 space-y-5"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+    >
       <div className="card items-center text-center">
-        <Trophy size={32} className="mx-auto text-amber-500" />
+        <motion.div
+          initial={{ scale: 0, rotate: -15 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 15, delay: 0.1 }}
+        >
+          <Trophy size={32} className="mx-auto text-amber-500" />
+        </motion.div>
         <p className="mt-3 text-3xl font-bold text-charcoal-900">
           {score} / {topic.quiz.length}
         </p>
@@ -161,6 +203,6 @@ export default function TopicFlow({ topic }: { topic: Topic }) {
         <Link href="/learn" className="btn-secondary">Back to Learn</Link>
         <Link href="/progress" className="btn-secondary">View Progress</Link>
       </div>
-    </div>
+    </motion.div>
   );
 }

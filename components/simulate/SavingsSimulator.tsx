@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, PiggyBank } from "lucide-react";
 import {
   calculateSavingsPlan,
   formatNaira,
+  humanizeMonths,
+  unitLabel,
   validatePositiveNumber,
   type Frequency,
   type SavingsResult,
@@ -32,6 +35,7 @@ export default function SavingsSimulator() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [result, setResult] = useState<SavingsResult | null>(null);
   const [calculating, setCalculating] = useState(false);
+  const [resultKey, setResultKey] = useState(0);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -64,6 +68,7 @@ export default function SavingsSimulator() {
       });
       setResult(plan);
       setCalculating(false);
+      setResultKey((k) => k + 1);
     }, 300);
   }
 
@@ -88,8 +93,10 @@ export default function SavingsSimulator() {
             value={form.frequency}
             onChange={(e) => update("frequency", e.target.value as Frequency)}
           >
-            <option value="monthly">Monthly</option>
+            <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="annually">Annually</option>
           </select>
         </div>
 
@@ -109,21 +116,44 @@ export default function SavingsSimulator() {
       </form>
 
       <div>
-        {!result && !calculating && (
-          <div className="card flex h-full flex-col items-center justify-center gap-3 text-center text-charcoal-500">
-            <PiggyBank size={32} className="text-forest-300" />
-            <p>Enter your savings details and calculate to see your results here.</p>
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {!result && !calculating && (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="card flex h-full flex-col items-center justify-center gap-3 text-center text-charcoal-500"
+            >
+              <PiggyBank size={32} className="text-forest-300" />
+              <p>Enter your savings details and calculate to see your results here.</p>
+            </motion.div>
+          )}
 
-        {calculating && (
-          <div className="card flex h-full flex-col items-center justify-center gap-2 text-charcoal-500">
-            <Loader2 size={24} className="animate-spin text-forest-500" />
-            Calculating...
-          </div>
-        )}
+          {calculating && (
+            <motion.div
+              key="calculating"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="card flex h-full flex-col items-center justify-center gap-2 text-charcoal-500"
+            >
+              <Loader2 size={24} className="animate-spin text-forest-500" />
+              Calculating...
+            </motion.div>
+          )}
 
-        {result && !calculating && <SavingsResultCard result={result} contribution={Number(form.contribution || 0)} goal={Number(form.goal)} />}
+          {result && !calculating && (
+            <motion.div
+              key={resultKey}
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+            >
+              <SavingsResultCard result={result} contribution={Number(form.contribution || 0)} goal={Number(form.goal)} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -149,11 +179,12 @@ function SavingsResultCard({
     );
   }
 
-  const unit = result.frequency === "monthly" ? "month" : "week";
+  const unit = unitLabel(result.frequency, result.periodsNeeded);
   const timeLabel =
     result.periodsNeeded === 0
       ? "You've already reached this goal!"
-      : `${result.periodsNeeded} ${unit}${result.periodsNeeded === 1 ? "" : "s"}`;
+      : `${result.periodsNeeded} ${unit}`;
+  const showHumanized = result.frequency !== "monthly" && result.periodsNeeded > 0;
 
   const maxValue = Math.max(goal, ...result.progressSeries);
 
@@ -164,12 +195,18 @@ function SavingsResultCard({
           Estimated time to reach your goal
         </p>
         <p className="mt-1 text-3xl font-bold text-charcoal-900">{timeLabel}</p>
+        {showHumanized && (
+          <p className="mt-1 text-sm text-charcoal-500">
+            (approximately {humanizeMonths(result.monthsNeeded)})
+          </p>
+        )}
       </div>
 
       {result.periodsNeeded > 0 && (
         <p className="text-sm text-charcoal-700">
-          At your current contribution of {formatNaira(contribution)} per {unit}, you would need
-          approximately {timeLabel} to reach your goal of {formatNaira(goal)}
+          At your current contribution of {formatNaira(contribution)} per{" "}
+          {unitLabel(result.frequency, 1)}, you would need approximately {timeLabel} to reach
+          your goal of {formatNaira(goal)}
           {result.interestEarned > 0 ? `, including about ${formatNaira(result.interestEarned)} in estimated interest` : ""}.
         </p>
       )}
@@ -178,10 +215,12 @@ function SavingsResultCard({
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-charcoal-300">Progress toward goal</p>
         <div className="flex h-24 items-end gap-1">
           {result.progressSeries.map((value, i) => (
-            <div
+            <motion.div
               key={i}
               className="flex-1 rounded-t bg-forest-400"
-              style={{ height: `${Math.max(4, (value / maxValue) * 100)}%` }}
+              initial={{ height: 0 }}
+              animate={{ height: `${Math.max(4, (value / maxValue) * 100)}%` }}
+              transition={{ duration: 0.4, delay: i * 0.02, ease: "easeOut" }}
               title={formatNaira(value)}
             />
           ))}

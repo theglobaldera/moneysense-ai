@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Loader2, HandCoins } from "lucide-react";
 import {
   calculateLoanPlan,
   formatNaira,
   formatNumber,
+  unitLabel,
   validatePositiveNumber,
   type Frequency,
   type LoanResult,
@@ -31,6 +33,7 @@ export default function LoanSimulator() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [result, setResult] = useState<LoanResult | null>(null);
   const [calculating, setCalculating] = useState(false);
+  const [resultKey, setResultKey] = useState(0);
 
   function update<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -61,6 +64,7 @@ export default function LoanSimulator() {
       });
       setResult(plan);
       setCalculating(false);
+      setResultKey((k) => k + 1);
     }, 300);
   }
 
@@ -79,8 +83,10 @@ export default function LoanSimulator() {
             value={form.frequency}
             onChange={(e) => update("frequency", e.target.value as Frequency)}
           >
-            <option value="monthly">Monthly</option>
+            <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="annually">Annually</option>
           </select>
         </div>
 
@@ -91,28 +97,52 @@ export default function LoanSimulator() {
       </form>
 
       <div>
-        {!result && !calculating && (
-          <div className="card flex h-full flex-col items-center justify-center gap-3 text-center text-charcoal-500">
-            <HandCoins size={32} className="text-forest-300" />
-            <p>Enter your loan details and calculate to see the true cost of borrowing.</p>
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {!result && !calculating && (
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="card flex h-full flex-col items-center justify-center gap-3 text-center text-charcoal-500"
+            >
+              <HandCoins size={32} className="text-forest-300" />
+              <p>Enter your loan details and calculate to see the true cost of borrowing.</p>
+            </motion.div>
+          )}
 
-        {calculating && (
-          <div className="card flex h-full flex-col items-center justify-center gap-2 text-charcoal-500">
-            <Loader2 size={24} className="animate-spin text-forest-500" />
-            Calculating...
-          </div>
-        )}
+          {calculating && (
+            <motion.div
+              key="calculating"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="card flex h-full flex-col items-center justify-center gap-2 text-charcoal-500"
+            >
+              <Loader2 size={24} className="animate-spin text-forest-500" />
+              Calculating...
+            </motion.div>
+          )}
 
-        {result && !calculating && <LoanResultCard result={result} />}
+          {result && !calculating && (
+            <motion.div
+              key={resultKey}
+              initial={{ opacity: 0, y: 12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+            >
+              <LoanResultCard result={result} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
 }
 
 function LoanResultCard({ result }: { result: LoanResult }) {
-  const unit = result.frequency === "monthly" ? "month" : "week";
+  const unit = unitLabel(result.frequency, result.numberOfInstallments);
+  const singularUnit = unitLabel(result.frequency, 1);
 
   return (
     <div className="card space-y-5">
@@ -147,7 +177,7 @@ function LoanResultCard({ result }: { result: LoanResult }) {
       <p className="border-t border-forest-100 pt-4 text-sm text-charcoal-700">
         You would repay approximately {formatNaira(result.totalInterest)} more than the amount
         originally borrowed under this simplified calculation — about {formatNaira(result.installmentAmount)}{" "}
-        per {unit} across {result.numberOfInstallments} {unit}{result.numberOfInstallments === 1 ? "" : "s"}.
+        per {singularUnit} across {result.numberOfInstallments} {unit}.
       </p>
 
       <p className="text-xs text-charcoal-300">

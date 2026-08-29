@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Send,
   Lightbulb,
@@ -11,11 +12,9 @@ import {
   Loader2,
   AlertTriangle,
   MessageCircleHeart,
-  Calculator,
-  Map,
 } from "lucide-react";
 import SafetyNote from "@/components/SafetyNote";
-import { parseAskResponse, extractKeepLearningTopics } from "@/lib/parseAskResponse";
+import AiResponseCard from "@/components/ai/AiResponseCard";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -30,7 +29,7 @@ const SUGGESTED_QUESTIONS = [
   "How can I spot a financial scam?",
 ];
 
-const SECTION_ICON: Record<string, typeof Lightbulb> = {
+const SECTION_ICONS = {
   "simple explanation": Lightbulb,
   "real-life example": Sparkles,
   "what this means": Compass,
@@ -91,7 +90,12 @@ export default function AskPage() {
   return (
     <div className="container-page flex min-h-[calc(100vh-4rem)] flex-col py-8">
       {messages.length === 0 && (
-        <div className="mx-auto max-w-2xl text-center">
+        <motion.div
+          className="mx-auto max-w-2xl text-center"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
           <h1 className="text-3xl font-bold sm:text-4xl">What would you like to understand?</h1>
           <p className="mt-3 text-charcoal-500">
             Ask a question about money and I&rsquo;ll help you understand it in simple terms.
@@ -110,37 +114,60 @@ export default function AskPage() {
             </div>
           ) : (
             <div className="mt-8 grid gap-2.5 sm:grid-cols-2">
-              {SUGGESTED_QUESTIONS.map((q) => (
-                <button
+              {SUGGESTED_QUESTIONS.map((q, i) => (
+                <motion.button
                   key={q}
                   onClick={() => sendMessage(q)}
-                  className="card text-left text-sm font-medium text-charcoal-700 transition hover:-translate-y-0.5 hover:border-forest-300 hover:shadow-card"
+                  className="card text-left text-sm font-medium text-charcoal-700"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.98 }}
                 >
                   &ldquo;{q}&rdquo;
-                </button>
+                </motion.button>
               ))}
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {messages.length > 0 && (
         <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-5 pb-4">
-          {messages.map((m, i) =>
-            m.role === "user" ? (
-              <div key={i} className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-forest-600 px-4 py-3 text-sm font-medium text-white">
-                {m.content}
-              </div>
-            ) : (
-              <AssistantResponse key={i} content={m.content} />
-            )
-          )}
+          <AnimatePresence initial={false}>
+            {messages.map((m, i) =>
+              m.role === "user" ? (
+                <motion.div
+                  key={i}
+                  className="ml-auto max-w-[85%] rounded-2xl rounded-tr-sm bg-forest-600 px-4 py-3 text-sm font-medium text-white"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {m.content}
+                </motion.div>
+              ) : (
+                <AiResponseCard
+                  key={i}
+                  content={m.content}
+                  label="MoneySense"
+                  labelIcon={MessageCircleHeart}
+                  sectionIcons={SECTION_ICONS}
+                />
+              )
+            )}
+          </AnimatePresence>
 
           {loading && (
-            <div className="flex items-center gap-2 text-sm text-charcoal-500">
+            <motion.div
+              className="flex items-center gap-2 text-sm text-charcoal-500"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
               <Loader2 size={16} className="animate-spin text-forest-500" />
               MoneySense is thinking...
-            </div>
+            </motion.div>
           )}
 
           {error && (
@@ -190,63 +217,6 @@ export default function AskPage() {
         </form>
         <SafetyNote className="mt-3" />
       </div>
-    </div>
-  );
-}
-
-function AssistantResponse({ content }: { content: string }) {
-  const sections = parseAskResponse(content);
-
-  return (
-    <div className="card space-y-4">
-      <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-forest-600">
-        <MessageCircleHeart size={14} /> MoneySense
-      </div>
-      {sections.map((section, i) => {
-        const key = section.heading.toLowerCase();
-        if (key === "keep learning") {
-          const topics = extractKeepLearningTopics(section.body);
-          return (
-            <div key={i}>
-              <SectionHeading heading={section.heading} />
-              <div className="mt-2 flex flex-wrap gap-2">
-                {topics.length > 0
-                  ? topics.map((t) => (
-                      <Link key={t.slug} href={`/learn/${t.slug}`} className="pill hover:bg-sage-200">
-                        {t.label}
-                      </Link>
-                    ))
-                  : <p className="text-sm text-charcoal-500">{section.body}</p>}
-              </div>
-            </div>
-          );
-        }
-        return (
-          <div key={i}>
-            <SectionHeading heading={section.heading} />
-            <p className="mt-1 whitespace-pre-line text-sm text-charcoal-700">{section.body}</p>
-          </div>
-        );
-      })}
-
-      <div className="flex flex-wrap gap-2 border-t border-forest-100 pt-3">
-        <Link href="/simulate" className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-600 hover:underline">
-          <Calculator size={15} /> Open Simulator
-        </Link>
-        <Link href="/scenarios" className="inline-flex items-center gap-1.5 text-sm font-semibold text-forest-600 hover:underline">
-          <Map size={15} /> Explore a Scenario
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function SectionHeading({ heading }: { heading: string }) {
-  const Icon = SECTION_ICON[heading.toLowerCase()] ?? Lightbulb;
-  return (
-    <div className="flex items-center gap-1.5 text-sm font-semibold text-charcoal-900">
-      <Icon size={15} className="text-forest-600" />
-      {heading}
     </div>
   );
 }

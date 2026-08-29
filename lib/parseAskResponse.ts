@@ -39,6 +39,11 @@ const TOPIC_SLUG_MAP: Record<string, string> = {
   borrowing: "borrowing",
   debt: "debt",
   "scam awareness": "scam-awareness",
+  "investing basics": "investing",
+  investing: "investing",
+  investment: "investing",
+  "emergency fund": "emergency-fund",
+  "emergency funds": "emergency-fund",
 };
 
 export function extractKeepLearningTopics(body: string): { label: string; slug: string }[] {

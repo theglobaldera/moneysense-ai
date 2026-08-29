@@ -64,6 +64,18 @@ export const topics: Topic[] = [
         explanation:
           "Spending consistently above income is a sign the budget needs adjusting — either by reducing discretionary spending or finding additional income — before it becomes a bigger problem.",
       },
+      {
+        id: "q4",
+        question: "If your income is irregular (e.g. freelance or side-hustle work), what's a sound budgeting approach?",
+        options: [
+          { id: "a", label: "Budget based on your best month and spend accordingly every month" },
+          { id: "b", label: "Budget based on a conservative, lower estimate and treat extra income as a bonus for savings" },
+          { id: "c", label: "Skip budgeting entirely since income changes too much" },
+        ],
+        correctOptionId: "b",
+        explanation:
+          "Planning around your lowest realistic income protects you in leaner months, while any extra in better months can boost savings instead of being relied upon in advance.",
+      },
     ],
   },
   {
@@ -112,6 +124,18 @@ export const topics: Topic[] = [
         explanation:
           "₦100,000 ÷ ₦20,000 per month = 5 months. Try the Savings Simulator to see how changing the monthly amount changes the timeline.",
       },
+      {
+        id: "q4",
+        question: "What does it mean to 'pay yourself first'?",
+        options: [
+          { id: "a", label: "Setting aside savings immediately when you're paid, before spending on anything else" },
+          { id: "b", label: "Spending on personal treats before paying any bills" },
+          { id: "c", label: "Paying off other people before saving anything" },
+        ],
+        correctOptionId: "a",
+        explanation:
+          "Moving savings out immediately — even automatically — means it isn't competing with the rest of the month's spending, which is why it tends to stick better than 'saving whatever's left'.",
+      },
     ],
   },
   {
@@ -158,6 +182,18 @@ export const topics: Topic[] = [
         correctOptionId: "b",
         explanation:
           "A higher rate means more interest accrues over the same term, which increases the total amount repaid above the original amount borrowed.",
+      },
+      {
+        id: "q4",
+        question: "What does APR (Annual Percentage Rate) represent?",
+        options: [
+          { id: "a", label: "The yearly cost of borrowing, expressed as a percentage, including most standard fees" },
+          { id: "b", label: "A one-time fee unrelated to time" },
+          { id: "c", label: "The amount you can borrow, not what it costs" },
+        ],
+        correctOptionId: "a",
+        explanation:
+          "APR gives you a standardised yearly cost figure, which makes it easier to compare the true cost of different loans rather than comparing headline numbers alone.",
       },
     ],
   },
@@ -206,6 +242,18 @@ export const topics: Topic[] = [
         explanation:
           "A longer term generally means more interest accrues over time, increasing the total cost — even if the monthly instalment feels smaller.",
       },
+      {
+        id: "q4",
+        question: "Two loans offer the same amount and term, but one lists extra 'processing' or 'service' fees. What should you compare?",
+        options: [
+          { id: "a", label: "Only the advertised interest rate" },
+          { id: "b", label: "The total amount you'd repay across the whole term, fees included" },
+          { id: "c", label: "Whichever lender responds fastest" },
+        ],
+        correctOptionId: "b",
+        explanation:
+          "Fees add to the real cost of borrowing even when they're not called 'interest'. Comparing total repayment amounts avoids being misled by a low headline rate.",
+      },
     ],
   },
   {
@@ -253,6 +301,18 @@ export const topics: Topic[] = [
         explanation:
           "Highest-interest debt grows fastest, so reducing it first generally limits the total interest you end up paying — though any consistent repayment plan is better than none.",
       },
+      {
+        id: "q4",
+        question: "Which is a reasonable example of debt used with a clear purpose, versus debt taken carelessly?",
+        options: [
+          { id: "a", label: "A student loan for education you couldn't otherwise afford, with a manageable repayment plan" },
+          { id: "b", label: "Multiple small loans taken to cover discretionary spending, without a repayment plan" },
+          { id: "c", label: "Both are equally risky regardless of purpose or planning" },
+        ],
+        correctOptionId: "a",
+        explanation:
+          "The same word 'debt' covers very different situations — what matters is the purpose, the cost, and whether there's a realistic plan to repay it.",
+      },
     ],
   },
   {
@@ -299,6 +359,136 @@ export const topics: Topic[] = [
         correctOptionId: "b",
         explanation:
           "Many scams pay early participants to build credibility and encourage others to join — that doesn't make the underlying offer legitimate.",
+      },
+      {
+        id: "q4",
+        question: "What's a reasonable step before putting money into an unfamiliar investment offer?",
+        options: [
+          { id: "a", label: "Check whether the company or scheme is registered with the relevant financial regulator" },
+          { id: "b", label: "Send a small 'test' payment first, since scammers won't ask for more if it's fake" },
+          { id: "c", label: "Trust it if the website looks professionally designed" },
+        ],
+        correctOptionId: "a",
+        explanation:
+          "A professional-looking website costs little to fake, and a small test payment doesn't protect you — scammers happily take small amounts too. Checking regulatory registration is a real, verifiable signal.",
+      },
+    ],
+  },
+  {
+    slug: "investing",
+    title: "Investing Basics",
+    shortDescription: "How investing differs from saving, and why risk and time matter.",
+    intro:
+      "Investing means putting money into something — like shares, a business, or a fund — with the hope it grows in value over time. Unlike a standard savings account, investments can lose value as well as gain it. In exchange for that risk, investments have the potential for higher returns over the long run.",
+    example:
+      "₦100,000 kept in savings might grow slowly and predictably with interest. The same ₦100,000 invested in shares could be worth more in five years — or less, if the market falls in the short term. That trade-off between predictability and potential growth is the core of investing.",
+    quiz: [
+      {
+        id: "q1",
+        question: "What is the main difference between saving and investing?",
+        options: [
+          { id: "a", label: "Saving carries risk of loss; investing guarantees growth" },
+          { id: "b", label: "Investing carries risk of loss in exchange for potentially higher returns; saving is generally more predictable" },
+          { id: "c", label: "There is no real difference between the two" },
+        ],
+        correctOptionId: "b",
+        explanation:
+          "Saving prioritises safety and predictability. Investing accepts some risk of loss in exchange for the potential of higher returns over time — neither is 'better', they serve different purposes.",
+      },
+      {
+        id: "q2",
+        question: "Why does investing generally suit longer time horizons better than short-term goals?",
+        options: [
+          { id: "a", label: "Because investments guarantee a fixed date to double in value" },
+          { id: "b", label: "Because value can drop in the short term, and a longer timeline gives it a chance to recover before you need the money" },
+          { id: "c", label: "Because investments cannot be sold quickly under any circumstances" },
+        ],
+        correctOptionId: "b",
+        explanation:
+          "If money is needed soon, a short-term drop in value could force you to sell at a loss. A longer horizon gives investments room to ride out ups and downs.",
+      },
+      {
+        id: "q3",
+        question: "What does 'diversification' mean in investing?",
+        options: [
+          { id: "a", label: "Putting all your money into a single promising opportunity" },
+          { id: "b", label: "Spreading money across different investments so one poor performer doesn't sink the whole picture" },
+          { id: "c", label: "Only investing in businesses you personally know the owners of" },
+        ],
+        correctOptionId: "b",
+        explanation:
+          "Spreading investments reduces how much a single loss can hurt you overall — it's a basic way to manage risk rather than eliminate it.",
+      },
+      {
+        id: "q4",
+        question: "Can a legitimate investment guarantee a specific profit in advance?",
+        options: [
+          { id: "a", label: "Yes, reputable investments always state a guaranteed return" },
+          { id: "b", label: "No — all genuine investments carry some uncertainty about their return" },
+          { id: "c", label: "Only investments backed by well-known companies can guarantee returns" },
+        ],
+        correctOptionId: "b",
+        explanation:
+          "No legitimate investment can honestly promise a guaranteed profit — returns depend on real-world performance, which is never fully certain. A guarantee is a warning sign, not a reassurance.",
+      },
+    ],
+  },
+  {
+    slug: "emergency-fund",
+    title: "Emergency Fund",
+    shortDescription: "A cushion set aside specifically for the unexpected.",
+    intro:
+      "An emergency fund is money set aside purely for unplanned, urgent costs — a medical bill, sudden job loss, or urgent repair — kept separate from everyday spending or long-term savings goals so it's there when you actually need it.",
+    example:
+      "If your essential monthly costs are ₦80,000, a starter emergency fund goal might be one month's worth (₦80,000), built up gradually, before working toward a larger cushion of three months (₦240,000).",
+    quiz: [
+      {
+        id: "q1",
+        question: "What is the primary purpose of an emergency fund?",
+        options: [
+          { id: "a", label: "Funding planned purchases like a vacation" },
+          { id: "b", label: "Covering unexpected, urgent costs without relying on high-cost borrowing" },
+          { id: "c", label: "Everyday spending money" },
+        ],
+        correctOptionId: "b",
+        explanation:
+          "An emergency fund exists so that a sudden cost doesn't force you into a high-interest loan just to cover something urgent and unplanned.",
+      },
+      {
+        id: "q2",
+        question: "Where is generally the most sensible place to keep an emergency fund?",
+        options: [
+          { id: "a", label: "Somewhere easily accessible, like a basic savings account — not locked away or invested" },
+          { id: "b", label: "Invested in shares for maximum growth" },
+          { id: "c", label: "Lent to a friend who will repay 'eventually'" },
+        ],
+        correctOptionId: "a",
+        explanation:
+          "The point of this fund is availability when needed, not maximum growth. Keeping it accessible matters more than earning the highest possible return on it.",
+      },
+      {
+        id: "q3",
+        question: "Should an emergency fund be mixed with money saved toward a specific goal, like a new phone?",
+        options: [
+          { id: "a", label: "Yes, combining them is simpler and works just as well" },
+          { id: "b", label: "No — mixing them makes it easy to accidentally spend the emergency cushion on non-emergencies" },
+          { id: "c", label: "It doesn't matter as long as the total amount is large enough" },
+        ],
+        correctOptionId: "b",
+        explanation:
+          "Keeping the emergency fund separate makes its purpose clear, and makes it much less likely to quietly get spent on something that isn't actually an emergency.",
+      },
+      {
+        id: "q4",
+        question: "If you're just starting out with irregular income, what's a realistic first emergency-fund goal?",
+        options: [
+          { id: "a", label: "A small, achievable buffer (e.g. one month of essential costs), built up gradually" },
+          { id: "b", label: "Nothing — wait until income is stable before starting" },
+          { id: "c", label: "A full year of expenses before doing anything else with your money" },
+        ],
+        correctOptionId: "a",
+        explanation:
+          "A smaller, achievable first target builds the habit and gives real protection sooner. The fund can keep growing over time — it doesn't need to be complete on day one.",
       },
     ],
   },
