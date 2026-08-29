@@ -14,6 +14,7 @@ import {
   ArrowRightCircle,
 } from "lucide-react";
 import AiResponseCard from "@/components/ai/AiResponseCard";
+import { fetchWithTimeout, isAbortError } from "@/lib/fetchWithTimeout";
 
 const SECTION_ICONS = {
   "situation recap": FileText,
@@ -47,7 +48,7 @@ export default function CustomScenario() {
     setResponse(null);
 
     try {
-      const res = await fetch("/api/scenario", {
+      const res = await fetchWithTimeout("/api/scenario", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: trimmed }),
@@ -61,8 +62,12 @@ export default function CustomScenario() {
       }
 
       setResponse(data.content);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(
+        isAbortError(err)
+          ? "MoneySense is taking too long to respond. Please try again."
+          : "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
     }

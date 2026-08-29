@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import SafetyNote from "@/components/SafetyNote";
 import AiResponseCard from "@/components/ai/AiResponseCard";
+import { fetchWithTimeout, isAbortError } from "@/lib/fetchWithTimeout";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -59,7 +60,7 @@ export default function AskPage() {
     setError(null);
 
     try {
-      const res = await fetch("/api/ask", {
+      const res = await fetchWithTimeout("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: nextMessages }),
@@ -74,8 +75,12 @@ export default function AskPage() {
       }
 
       setMessages([...nextMessages, { role: "assistant", content: data.content }]);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err) {
+      setError(
+        isAbortError(err)
+          ? "MoneySense is taking too long to respond. Please try again."
+          : "Something went wrong. Please try again."
+      );
       setMessages(messages);
     } finally {
       setLoading(false);
