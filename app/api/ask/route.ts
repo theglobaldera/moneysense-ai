@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { callGemini, isRateLimitError, DEFAULT_GEMINI_MODEL } from "@/lib/ai/gemini";
+import { callGemini, isRateLimitError, isTimeoutError, DEFAULT_GEMINI_MODEL } from "@/lib/ai/gemini";
 import { ASK_MONEYSENSE_SYSTEM_PROMPT } from "@/lib/ai/systemPrompt";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 30;
 
 const MODEL = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
 const MAX_MESSAGES = 20;
@@ -74,6 +75,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "MoneySense is receiving a lot of questions right now. Please try again shortly." },
         { status: 429 }
+      );
+    }
+    if (isTimeoutError(err)) {
+      return NextResponse.json(
+        { error: "MoneySense is taking too long to respond. Please try again in a moment." },
+        { status: 504 }
       );
     }
     console.error("Ask MoneySense AI error:", err);
