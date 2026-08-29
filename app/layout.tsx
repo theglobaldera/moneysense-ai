@@ -3,10 +3,27 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+const description =
+  "MoneySense AI is an AI-powered financial literacy assistant that helps young people understand everyday financial concepts and explore financial decisions through simple explanations, realistic scenarios, and practical calculations.";
+
 export const metadata: Metadata = {
-  title: "MoneySense AI — Make money make sense.",
-  description:
-    "MoneySense AI is an AI-powered financial literacy assistant that helps young people understand everyday financial concepts and explore financial decisions through simple explanations, realistic scenarios, and practical calculations.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  title: {
+    default: "MoneySense AI — Make money make sense.",
+    template: "%s",
+  },
+  description,
+  openGraph: {
+    title: "MoneySense AI — Make money make sense.",
+    description,
+    type: "website",
+    siteName: "MoneySense AI",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MoneySense AI — Make money make sense.",
+    description,
+  },
 };
 
 export const viewport = {
