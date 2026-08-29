@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenAI } from "@google/genai";
+import { callGemini, isRateLimitError, DEFAULT_GEMINI_MODEL } from "@/lib/ai/gemini";
 import { ASK_MONEYSENSE_SYSTEM_PROMPT } from "@/lib/ai/systemPrompt";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// gemini-2.5-flash is on Google AI Studio's free tier (no credit card required):
-// 1,500 requests/day, 15 requests/minute — comfortably enough for this app.
-const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const MODEL = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_LENGTH = 2000;
 
@@ -56,20 +54,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey });
-    const response = await ai.models.generateContent({
+    const content = await callGemini({
+      apiKey,
       model: MODEL,
-      contents: sanitized.map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      })),
-      config: {
-        systemInstruction: ASK_MONEYSENSE_SYSTEM_PROMPT,
-        maxOutputTokens: 700,
-      },
+      systemInstruction: ASK_MONEYSENSE_SYSTEM_PROMPT,
+      messages: sanitized,
     });
-
-    const content = response.text ?? "";
 
     if (!content) {
       return NextResponse.json(
@@ -80,9 +70,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ content });
   } catch (err: unknown) {
-    const status = (err as { status?: number })?.status;
-    const message = err instanceof Error ? err.message : "";
-    if (status === 429 || message.includes("RESOURCE_EXHAUSTED") || message.includes("429")) {
+    if (isRateLimitError(err)) {
       return NextResponse.json(
         { error: "MoneySense is receiving a lot of questions right now. Please try again shortly." },
         { status: 429 }

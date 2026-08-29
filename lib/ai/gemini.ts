@@ -1,0 +1,41 @@
+import { GoogleGenAI } from "@google/genai";
+
+// gemini-2.5-flash is on Google AI Studio's free tier (no credit card required):
+// 1,500 requests/day, 15 requests/minute — comfortably enough for this app.
+export const DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
+
+export interface GeminiMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export async function callGemini({
+  apiKey,
+  model,
+  systemInstruction,
+  messages,
+  maxOutputTokens = 700,
+}: {
+  apiKey: string;
+  model: string;
+  systemInstruction: string;
+  messages: GeminiMessage[];
+  maxOutputTokens?: number;
+}): Promise<string> {
+  const ai = new GoogleGenAI({ apiKey });
+  const response = await ai.models.generateContent({
+    model,
+    contents: messages.map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    })),
+    config: { systemInstruction, maxOutputTokens },
+  });
+  return response.text ?? "";
+}
+
+export function isRateLimitError(err: unknown): boolean {
+  const status = (err as { status?: number })?.status;
+  const message = err instanceof Error ? err.message : "";
+  return status === 429 || message.includes("RESOURCE_EXHAUSTED") || message.includes("429");
+}

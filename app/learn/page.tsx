@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { CheckCircle2, Circle, Wallet, PiggyBank, Percent, HandCoins, Scale, ShieldAlert } from "lucide-react";
+import { CheckCircle2, Circle, Wallet, PiggyBank, Percent, HandCoins, Scale, ShieldAlert, TrendingUp, LifeBuoy } from "lucide-react";
+import { MotionLink } from "@/components/motion/MotionLink";
+import Reveal from "@/components/motion/Reveal";
 import { topics } from "@/lib/content/topics";
 import { getProgress, type ProgressState } from "@/lib/progress";
 
@@ -13,6 +14,8 @@ const TOPIC_ICONS: Record<string, typeof Wallet> = {
   borrowing: HandCoins,
   debt: Scale,
   "scam-awareness": ShieldAlert,
+  investing: TrendingUp,
+  "emergency-fund": LifeBuoy,
 };
 
 export default function LearnPage() {
@@ -32,28 +35,31 @@ export default function LearnPage() {
       </div>
 
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {topics.map((topic) => {
+        {topics.map((topic, i) => {
           const Icon = TOPIC_ICONS[topic.slug] ?? Wallet;
           const done = progress?.completedTopics.includes(topic.slug);
           return (
-            <Link
-              key={topic.slug}
-              href={`/learn/${topic.slug}`}
-              className="card flex flex-col gap-3 transition hover:-translate-y-1 hover:shadow-card"
-            >
-              <div className="flex items-center justify-between">
-                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sage-100 text-forest-700">
-                  <Icon size={20} />
-                </span>
-                {done ? (
-                  <CheckCircle2 size={20} className="text-forest-600" />
-                ) : (
-                  <Circle size={20} className="text-charcoal-300" />
-                )}
-              </div>
-              <h2 className="font-semibold">{topic.title}</h2>
-              <p className="text-sm text-charcoal-500">{topic.shortDescription}</p>
-            </Link>
+            <Reveal key={topic.slug} delay={i * 0.06}>
+              <MotionLink
+                href={`/learn/${topic.slug}`}
+                className="card flex h-full flex-col gap-3"
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sage-100 text-forest-700">
+                    <Icon size={20} />
+                  </span>
+                  {done ? (
+                    <CheckCircle2 size={20} className="text-forest-600" />
+                  ) : (
+                    <Circle size={20} className="text-charcoal-300" />
+                  )}
+                </div>
+                <h2 className="font-semibold">{topic.title}</h2>
+                <p className="text-sm text-charcoal-500">{topic.shortDescription}</p>
+              </MotionLink>
+            </Reveal>
           );
         })}
       </div>

@@ -2,7 +2,7 @@
 // Every formula is intentionally simplified for financial-literacy purposes and
 // labelled as such in the UI; it is not a substitute for a bank's exact terms.
 
-export type Frequency = "monthly" | "weekly";
+export type Frequency = "daily" | "weekly" | "monthly" | "annually";
 
 export function formatNaira(amount: number): string {
   if (!Number.isFinite(amount)) return "₦0";
@@ -17,10 +17,33 @@ export function formatNumber(n: number): string {
   return new Intl.NumberFormat("en-NG", { maximumFractionDigits: 1 }).format(n);
 }
 
-const PERIODS_PER_YEAR: Record<Frequency, number> = {
-  monthly: 12,
+export const PERIODS_PER_YEAR: Record<Frequency, number> = {
+  daily: 365,
   weekly: 52,
+  monthly: 12,
+  annually: 1,
 };
+
+export const FREQUENCY_LABEL: Record<Frequency, string> = {
+  daily: "Daily",
+  weekly: "Weekly",
+  monthly: "Monthly",
+  annually: "Annually",
+};
+
+export const FREQUENCY_UNIT: Record<Frequency, string> = {
+  daily: "day",
+  weekly: "week",
+  monthly: "month",
+  annually: "year",
+};
+
+export function unitLabel(frequency: Frequency, count: number): string {
+  const unit = FREQUENCY_UNIT[frequency];
+  return `${unit}${count === 1 ? "" : "s"}`;
+}
+
+const MAX_YEARS = 100;
 
 export interface SavingsInput {
   goal: number;
@@ -38,16 +61,16 @@ export interface SavingsResult {
   totalContributed: number;
   interestEarned: number;
   projectedTotal: number;
-  /** Balance at the end of each period, capped for charting (max ~24 points). */
+  /** Balance at the end of each period, capped for charting (max ~25 points). */
   progressSeries: number[];
 }
 
-const MAX_PERIODS = 1200; // 100 years of monthly saving — a safe upper bound
-
 export function calculateSavingsPlan(input: SavingsInput): SavingsResult {
   const { goal, current, contribution, frequency } = input;
+  const periodsPerYear = PERIODS_PER_YEAR[frequency];
+  const maxPeriods = MAX_YEARS * periodsPerYear;
   const annualRate = input.annualInterestRatePercent ?? 0;
-  const periodicRate = annualRate / 100 / PERIODS_PER_YEAR[frequency];
+  const periodicRate = annualRate / 100 / periodsPerYear;
 
   let balance = current;
   let totalContributed = 0;
@@ -70,9 +93,9 @@ export function calculateSavingsPlan(input: SavingsInput): SavingsResult {
   if (contribution <= 0 && periodicRate <= 0) {
     return {
       reached: false,
-      periodsNeeded: MAX_PERIODS,
+      periodsNeeded: maxPeriods,
       frequency,
-      monthsNeeded: MAX_PERIODS,
+      monthsNeeded: Math.round(maxPeriods * (12 / periodsPerYear)),
       totalContributed: 0,
       interestEarned: 0,
       projectedTotal: balance,
@@ -80,7 +103,7 @@ export function calculateSavingsPlan(input: SavingsInput): SavingsResult {
     };
   }
 
-  while (balance < goal && periods < MAX_PERIODS) {
+  while (balance < goal && periods < maxPeriods) {
     const interest = balance * periodicRate;
     balance += interest + contribution;
     totalContributed += contribution;
@@ -88,11 +111,10 @@ export function calculateSavingsPlan(input: SavingsInput): SavingsResult {
     series.push(balance);
   }
 
-  const monthsNeeded =
-    frequency === "monthly" ? periods : Math.round((periods / 52) * 12);
+  const monthsNeeded = Math.round(periods * (12 / periodsPerYear));
 
   return {
-    reached: periods < MAX_PERIODS,
+    reached: periods < maxPeriods,
     periodsNeeded: periods,
     frequency,
     monthsNeeded,
@@ -133,10 +155,10 @@ export function calculateLoanPlan(input: LoanInput): LoanResult {
   const { principal, annualRatePercent, termMonths, frequency } = input;
   const totalInterest = principal * (annualRatePercent / 100) * (termMonths / 12);
   const totalRepayment = principal + totalInterest;
-  const numberOfInstallments =
-    frequency === "monthly"
-      ? Math.max(1, Math.round(termMonths))
-      : Math.max(1, Math.round((termMonths / 12) * 52));
+  const numberOfInstallments = Math.max(
+    1,
+    Math.round((termMonths / 12) * PERIODS_PER_YEAR[frequency])
+  );
   const installmentAmount = totalRepayment / numberOfInstallments;
 
   return {
@@ -148,6 +170,16 @@ export function calculateLoanPlan(input: LoanInput): LoanResult {
     frequency,
     costOfBorrowingPercent: principal > 0 ? (totalInterest / principal) * 100 : 0,
   };
+}
+
+export function humanizeMonths(months: number): string {
+  if (months < 1) return "less than a month";
+  if (months < 12) return `${months} month${months === 1 ? "" : "s"}`;
+  const years = Math.floor(months / 12);
+  const remainder = months % 12;
+  const yearsLabel = `${years} year${years === 1 ? "" : "s"}`;
+  if (remainder === 0) return yearsLabel;
+  return `${yearsLabel} ${remainder} month${remainder === 1 ? "" : "s"}`;
 }
 
 export function validatePositiveNumber(

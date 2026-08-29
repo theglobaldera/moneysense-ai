@@ -23,7 +23,7 @@ export default function ScenarioDetailPage({ params }: { params: { slug: string 
         <ChevronLeft size={16} /> Back to Scenarios
       </Link>
       <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-charcoal-300">
-        Scenario {scenario.number}
+        Example {scenario.number}
       </p>
       <h1 className="mt-1 text-3xl font-bold">{scenario.title}</h1>
 

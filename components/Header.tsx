@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AnimatePresence, motion } from "framer-motion";
 import { Menu, X, MessageCircleHeart } from "lucide-react";
 import Logo from "./Logo";
 import { navLinks } from "@/lib/navLinks";
@@ -54,45 +55,53 @@ export default function Header() {
         </button>
       </div>
 
-      {open && (
-        <nav
-          id="mobile-menu"
-          aria-label="Mobile"
-          className="border-t border-forest-100 bg-cream-50 px-4 pb-4 pt-2 md:hidden"
-        >
-          <ul className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className={`block rounded-lg px-4 py-3 text-base font-medium ${
-                    isActive(link.href)
-                      ? "bg-forest-100 text-forest-700"
-                      : "text-charcoal-700 hover:bg-forest-50"
-                  }`}
-                  aria-current={isActive(link.href) ? "page" : undefined}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-            <li>
-              <Link
-                href="/about"
-                onClick={() => setOpen(false)}
-                className="block rounded-lg px-4 py-3 text-base font-medium text-charcoal-700 hover:bg-forest-50"
-              >
-                About / Safety
+      <AnimatePresence>
+        {open && (
+          <motion.nav
+            id="mobile-menu"
+            aria-label="Mobile"
+            className="overflow-hidden border-t border-forest-100 bg-cream-50 px-4 md:hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+          >
+            <div className="pb-4 pt-2">
+              <ul className="flex flex-col gap-1">
+                {navLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      className={`block rounded-lg px-4 py-3 text-base font-medium ${
+                        isActive(link.href)
+                          ? "bg-forest-100 text-forest-700"
+                          : "text-charcoal-700 hover:bg-forest-50"
+                      }`}
+                      aria-current={isActive(link.href) ? "page" : undefined}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+                <li>
+                  <Link
+                    href="/about"
+                    onClick={() => setOpen(false)}
+                    className="block rounded-lg px-4 py-3 text-base font-medium text-charcoal-700 hover:bg-forest-50"
+                  >
+                    About / Safety
+                  </Link>
+                </li>
+              </ul>
+              <Link href="/ask" onClick={() => setOpen(false)} className="btn-primary mt-3 w-full">
+                <MessageCircleHeart size={18} />
+                Ask MoneySense
               </Link>
-            </li>
-          </ul>
-          <Link href="/ask" onClick={() => setOpen(false)} className="btn-primary mt-3 w-full">
-            <MessageCircleHeart size={18} />
-            Ask MoneySense
-          </Link>
-        </nav>
-      )}
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
