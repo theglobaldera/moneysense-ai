@@ -24,10 +24,10 @@ const SECTION_ICONS = {
 };
 
 const EXAMPLE_PROMPT =
-  "I earn ₦150,000 a month from a part-time job. I want to save for a phone, help my family sometimes, and I just got offered a ₦50,000 loan. Not sure how to balance it all.";
+  "I earn ₦150,000 a month from a part-time job. I want to save for a phone, help my family sometimes, and I just got offered a ₦50,000 loan. Not sure how to balance it all. Take your time — write as much or as little as you want. The more you share, the more MoneySense can actually work with.";
 
 const MIN_LENGTH = 15;
-const MAX_LENGTH = 800;
+const MAX_LENGTH = 6000;
 
 export default function CustomScenario() {
   const [description, setDescription] = useState("");
@@ -79,8 +79,9 @@ export default function CustomScenario() {
         <Sparkles size={14} /> Describe Your Own Situation
       </div>
       <p className="mt-2 text-sm text-charcoal-500">
-        Tell MoneySense what&rsquo;s going on with your money right now, and get back a
-        structured way to think it through — not advice, a way to reason about it yourself.
+        Tell MoneySense everything that&rsquo;s going on with your money right now — pour it all
+        out, there&rsquo;s no need to keep it short. You&rsquo;ll get back a real, in-depth way to
+        think it through — not advice, a way to reason about it yourself.
       </p>
 
       {aiUnavailable ? (
@@ -94,10 +95,10 @@ export default function CustomScenario() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={EXAMPLE_PROMPT}
-            rows={4}
+            rows={10}
             maxLength={MAX_LENGTH}
             aria-label="Describe your financial situation"
-            className="field-input resize-none"
+            className="field-input resize-y"
           />
           <div className="flex items-center justify-between">
             <p className="text-xs text-charcoal-300">
@@ -124,7 +125,8 @@ export default function CustomScenario() {
           animate={{ opacity: 1 }}
         >
           <Loader2 size={16} className="animate-spin text-forest-500" />
-          MoneySense is thinking about your situation...
+          MoneySense is thinking carefully about your situation — a thorough reply can take up to
+          a minute...
         </motion.div>
       )}
 

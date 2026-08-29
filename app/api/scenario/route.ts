@@ -4,11 +4,11 @@ import { CUSTOM_SCENARIO_SYSTEM_PROMPT } from "@/lib/ai/scenarioSystemPrompt";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const MODEL = process.env.GEMINI_MODEL || DEFAULT_GEMINI_MODEL;
 const MIN_LENGTH = 15;
-const MAX_LENGTH = 800;
+const MAX_LENGTH = 6000;
 
 export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
