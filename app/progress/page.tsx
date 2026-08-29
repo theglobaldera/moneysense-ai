@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Circle, Map, Target, HelpCircle, PieChart, Sparkles } from "lucide-react";
 import { topics, getTopicBySlug } from "@/lib/content/topics";
-import { getProgress, computeStats, hasAnyProgress, type ProgressState } from "@/lib/progress";
+import { getProgress, computeStats, hasAnyProgress, seedSampleProgress, type ProgressState } from "@/lib/progress";
+import Reveal from "@/components/motion/Reveal";
 
 export default function ProgressPage() {
   const [state, setState] = useState<ProgressState | null>(null);
@@ -23,9 +24,14 @@ export default function ProgressPage() {
         <p className="mt-2 max-w-md text-charcoal-500">
           Complete your first quiz or explore a scenario to begin tracking your learning.
         </p>
-        <Link href="/learn" className="btn-primary mt-6">
-          Start Learning <ArrowRight size={16} />
-        </Link>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link href="/learn" className="btn-primary">
+            Start Learning <ArrowRight size={16} />
+          </Link>
+          <button onClick={() => setState(seedSampleProgress())} className="btn-secondary">
+            Preview sample progress
+          </button>
+        </div>
       </div>
     );
   }
@@ -38,14 +44,16 @@ export default function ProgressPage() {
       <h1 className="text-3xl font-bold">Your MoneySense Journey</h1>
 
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard icon={Target} label="Topics explored" value={`${stats.topicsExplored}/${stats.totalTopics}`} />
-        <StatCard icon={HelpCircle} label="Quizzes completed" value={String(stats.quizzesCompleted)} />
-        <StatCard
-          icon={PieChart}
-          label="Quiz accuracy"
-          value={stats.quizAccuracyPercent !== null ? `${stats.quizAccuracyPercent}%` : "—"}
-        />
-        <StatCard icon={Sparkles} label="Scenarios explored" value={String(stats.scenariosExplored)} />
+        <Reveal delay={0}><StatCard icon={Target} label="Topics explored" value={`${stats.topicsExplored}/${stats.totalTopics}`} /></Reveal>
+        <Reveal delay={0.05}><StatCard icon={HelpCircle} label="Quizzes completed" value={String(stats.quizzesCompleted)} /></Reveal>
+        <Reveal delay={0.1}>
+          <StatCard
+            icon={PieChart}
+            label="Quiz accuracy"
+            value={stats.quizAccuracyPercent !== null ? `${stats.quizAccuracyPercent}%` : "—"}
+          />
+        </Reveal>
+        <Reveal delay={0.15}><StatCard icon={Sparkles} label="Scenarios explored" value={String(stats.scenariosExplored)} /></Reveal>
       </div>
 
       <div className="card mt-8">
