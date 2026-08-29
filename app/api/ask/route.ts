@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenAI } from "@google/genai";
 import { ASK_MONEYSENSE_SYSTEM_PROMPT } from "@/lib/ai/systemPrompt";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
+// gemini-2.5-flash is on Google AI Studio's free tier (no credit card required):
+// 1,500 requests/day, 15 requests/minute — comfortably enough for this app.
+const MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 const MAX_MESSAGES = 20;
 const MAX_MESSAGE_LENGTH = 2000;
 
@@ -15,10 +17,10 @@ interface ChatMessage {
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "AI is not configured on this server yet. Add ANTHROPIC_API_KEY to enable Ask MoneySense." },
+      { error: "AI is not configured on this server yet. Add GEMINI_API_KEY to enable Ask MoneySense." },
       { status: 503 }
     );
   }
@@ -54,16 +56,20 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const anthropic = new Anthropic({ apiKey });
-    const response = await anthropic.messages.create({
+    const ai = new GoogleGenAI({ apiKey });
+    const response = await ai.models.generateContent({
       model: MODEL,
-      max_tokens: 700,
-      system: ASK_MONEYSENSE_SYSTEM_PROMPT,
-      messages: sanitized,
+      contents: sanitized.map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      })),
+      config: {
+        systemInstruction: ASK_MONEYSENSE_SYSTEM_PROMPT,
+        maxOutputTokens: 700,
+      },
     });
 
-    const textBlock = response.content.find((block) => block.type === "text");
-    const content = textBlock && textBlock.type === "text" ? textBlock.text : "";
+    const content = response.text ?? "";
 
     if (!content) {
       return NextResponse.json(
@@ -75,7 +81,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ content });
   } catch (err: unknown) {
     const status = (err as { status?: number })?.status;
-    if (status === 429) {
+    const message = err instanceof Error ? err.message : "";
+    if (status === 429 || message.includes("RESOURCE_EXHAUSTED") || message.includes("429")) {
       return NextResponse.json(
         { error: "MoneySense is receiving a lot of questions right now. Please try again shortly." },
         { status: 429 }
